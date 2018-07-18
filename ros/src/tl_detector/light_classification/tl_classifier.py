@@ -5,13 +5,19 @@ import numpy as np
 class TLClassifier(object):
     def __init__(self):
         #load classifier
-        graph_path = 'light_classification/models/model_real/frozen_inference_graph.pb'
-        self.graph = self.load_graph(graph_path)
-        self.image_tensor = self.graph.get_tensor_by_name('image_tensor:0')
-        self.boxes = self.graph.get_tensor_by_name('detection_boxes:0')
-        self.scores = self.graph.get_tensor_by_name('detection_scores:0')
-        self.classes = self.graph.get_tensor_by_name('detection_classes:0')
-        self.num_detections = self.graph.get_tensor_by_name('num_detections:0')
+        graph_path = '/home/workspace/Capstone/ros/src/tl_detector/light_classification/models/model_sim/frozen_inference_graph.pb'
+        self.graph = tf.Graph()
+        
+        with self.graph.as_default():
+            od_graph_def = tf.GraphDef()
+            with tf.gfile.GFile(graph_path, 'rb') as fid:
+                od_graph_def.ParseFromString(fid.read())
+                tf.import_graph_def(od_graph_def, name='')
+            self.image_tensor = self.graph.get_tensor_by_name('image_tensor:0')
+            self.boxes = self.graph.get_tensor_by_name('detection_boxes:0')
+            self.scores = self.graph.get_tensor_by_name('detection_scores:0')
+            self.classes = self.graph.get_tensor_by_name('detection_classes:0')
+            self.num_detections = self.graph.get_tensor_by_name('num_detections:0')
         self.sess = tf.Session(graph=self.graph)
 
     def get_classification(self, image):
@@ -48,16 +54,3 @@ class TLClassifier(object):
 
         return TrafficLight.UNKNOWN
 
-    def load_graph(frozen_graph_filename):
-        # We load the protobuf file from the disk and parse it to retrieve the
-        # unserialized graph_def
-        with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
-            graph_def = tf.GraphDef()
-            graph_def.ParseFromString(f.read())
-
-        # Then, we import the graph_def into a new Graph and returns it
-        with tf.Graph().as_default() as graph:
-            # The name var will prefix every op/nodes in your graph
-            # Since we load everything in a new graph, this is not needed
-            tf.import_graph_def(graph_def, name="prefix")
-        return graph
