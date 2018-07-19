@@ -5,7 +5,7 @@ import numpy as np
 class TLClassifier(object):
     def __init__(self):
         #load classifier
-        graph_path = './models/model_sim/frozen_inference_graph.pb'
+        graph_path = './light_classification/models/model_sim/frozen_inference_graph.pb'
         self.graph = tf.Graph()
         
         with self.graph.as_default():
