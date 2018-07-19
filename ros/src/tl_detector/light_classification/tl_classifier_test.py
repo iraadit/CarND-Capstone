@@ -5,7 +5,7 @@ import numpy as np
 class TLClassifierTest(object):
     def __init__(self):
         #load classifier
-        graph_path = '/home/workspace/Capstone/ros/src/tl_detector/light_classification/models/model_real/frozen_inference_graph.pb'
+        graph_path = './models/model_real/frozen_inference_graph.pb'
         self.graph = tf.Graph()
         
         with self.graph.as_default():
@@ -70,7 +70,8 @@ class TLClassifierTest(object):
 
 if __name__ == "__main__":
     classifier = TLClassifierTest();
-    image = cv2.imread('/home/workspace/Capstone/test_imgs/udacity_testarea_rgb/left0710.jpg')
+    image_path = '' #MODIFY THIS LINE TO GIVE THE CLASSIFIER AN IMAGE
+    image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     classifier.get_classification(image);
     
