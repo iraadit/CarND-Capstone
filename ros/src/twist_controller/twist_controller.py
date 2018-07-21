@@ -20,7 +20,7 @@ class Controller(object):
         ki = 0.1
         kd = 0.0
         mn = 0. # minimun throttle value
-        mx = 0.2  # maximun trottle value
+        mx = 0.5  # maximun trottle value
         self.throttle_controller = PID(kp,ki,kd,mn,mx)
 
         tau = 0.5  # 1(2pi tau), cutoff frecuency
@@ -34,6 +34,13 @@ class Controller(object):
         self.accel_limit  = accel_limit
         self.wheel_radius = wheel_radius
         self.last_time = rospy.get_time()
+	'''
+        #AVG Filter
+        self.steeringBuffer = []
+	self.nAvg=10
+
+	'''
+        self.str_lpf = LowPassFilter(0.2,0.1)
 
         
 
@@ -44,6 +51,15 @@ class Controller(object):
             self.throttle_controller.reset()
         current_vel = self.vel_lpf.filt(current_vel)
         steering = self.yaw_controller.get_steering(linear_vel,angular_vel,current_vel)
+        steering = self.str_lpf.filt(steering)
+        '''
+	#AVG Filter
+	self.steeringBuffer.append(steering)
+	
+	if len(self.steeringBuffer) > self.nAvg:
+		self.steeringBuffer.pop(0)
+	steering = sum(self.steeringBuffer)/float(len(self.steeringBuffer))
+        '''
         vel_error = linear_vel - current_vel
         self.last_vel = current_vel
 
