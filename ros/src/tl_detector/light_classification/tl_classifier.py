@@ -3,9 +3,12 @@ import tensorflow as tf
 import numpy as np
 
 class TLClassifier(object):
-    def __init__(self):
+    def __init__(self, is_site):
         #load classifier
-        graph_path = './light_classification/models/model_sim/frozen_inference_graph.pb'
+        if is_site:
+            graph_path = './light_classification/models/model_real/frozen_inference_graph.pb'
+        else:
+            graph_path = './light_classification/models/model_sim/frozen_inference_graph.pb'
         self.graph = tf.Graph()
         
         with self.graph.as_default():
