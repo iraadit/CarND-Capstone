@@ -26,7 +26,7 @@ class TLClassifier(object):
             self.classes = self.graph.get_tensor_by_name('detection_classes:0')
             self.num_detections = self.graph.get_tensor_by_name('num_detections:0')
         self.sess = tf.Session(graph=self.graph)
-        self.imcount = 0
+        #self.imcount = 0
 
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
@@ -60,7 +60,8 @@ class TLClassifier(object):
             crop_img2 = image[top+one_third:top+2*one_third, left:right]
             crop_img3 = image[top+2*one_third:top+h, left:right]
             light_array =  np.array([np.mean(crop_img3), np.mean(crop_img1), np.mean(crop_img2)])
-            print(str(self.imcount).zfill(4) + ' ' + self.colors_str[np.argmax(light_array) + 1])
+            #print(str(self.imcount).zfill(4) + ' ' + self.colors_str[np.argmax(light_array) + 1])
+            print(self.colors_str[np.argmax(light_array) + 1])
             return(self.colors[np.argmax(light_array) + 1])
         elif scores[0] >= 0.5:
             if classes[0] == 1:
@@ -76,6 +77,6 @@ class TLClassifier(object):
                 print('UNKNOWN')
         else:
             print('UNKNOWN')
-        self.imcount += 1
+        #self.imcount += 1
         return TrafficLight.UNKNOWN
 
