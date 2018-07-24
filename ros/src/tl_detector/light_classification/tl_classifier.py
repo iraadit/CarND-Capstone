@@ -51,7 +51,7 @@ class TLClassifier(object):
             ymin, xmin, ymax, xmax = tuple(boxes[0].tolist())
             (left, right, top, bottom) = (round(xmin * im_width), round(xmax * im_width), round(ymin * im_height), round(ymax * im_height))
             h = bottom - top + 1
-            crop_img1 = image[top:bottom, left:right]
+            crop_img1 = image[top:top+round(h/3), left:right]
             crop_img2 = image[top+round(h/3):top+2*round(h/3), left:right]
             crop_img3 = image[top+2*round(h/3):top+h, left:right]
             light_array =  np.array([np.mean(crop_img3), np.mean(crop_img1), np.mean(crop_img2)])
