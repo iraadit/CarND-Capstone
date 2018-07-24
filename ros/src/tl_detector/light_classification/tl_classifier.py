@@ -1,6 +1,7 @@
 from styx_msgs.msg import TrafficLight
 import tensorflow as tf
 import numpy as np
+#import cv2
 
 class TLClassifier(object):
     def __init__(self, is_site):
@@ -13,7 +14,7 @@ class TLClassifier(object):
         else:
             graph_path = './light_classification/models/model_sim/frozen_inference_graph.pb'
         self.graph = tf.Graph()
-        
+        print(graph_path)
         with self.graph.as_default():
             od_graph_def = tf.GraphDef()
             with tf.gfile.GFile(graph_path, 'rb') as fid:
@@ -25,6 +26,7 @@ class TLClassifier(object):
             self.classes = self.graph.get_tensor_by_name('detection_classes:0')
             self.num_detections = self.graph.get_tensor_by_name('num_detections:0')
         self.sess = tf.Session(graph=self.graph)
+        self.imcount = 0
 
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
@@ -44,18 +46,21 @@ class TLClassifier(object):
         scores = np.squeeze(scores)
         classes = np.squeeze(classes).astype(np.int32)
         print('SCORES: ', scores[0])
-        print('CLASSES: ', classes[0])
 
         im_height, im_width, _ = image.shape
-        if self.is_site and scores[0] < .9 and scores[0] > .4: #Deal with uncertainties in real images
+        if scores[0] < .9 and scores[0] > .35: #Deal with uncertainties in real images
             ymin, xmin, ymax, xmax = tuple(boxes[0].tolist())
-            (left, right, top, bottom) = (round(xmin * im_width), round(xmax * im_width), round(ymin * im_height), round(ymax * im_height))
+            (left, right, top, bottom) = (int(round(xmin * im_width)), int(round(xmax * im_width)), 
+                                          int(round(ymin * im_height)), int(round(ymax * im_height)))
             h = bottom - top + 1
-            crop_img1 = image[top:top+round(h/3), left:right]
-            crop_img2 = image[top+round(h/3):top+2*round(h/3), left:right]
-            crop_img3 = image[top+2*round(h/3):top+h, left:right]
+            #cv2.imwrite('/home/workspace/sim_images/'+ str(self.imcount).zfill(4) +'.jpg', image)
+            
+            one_third = int(round(h/3))
+            crop_img1 = image[top:top+one_third, left:right]
+            crop_img2 = image[top+one_third:top+2*one_third, left:right]
+            crop_img3 = image[top+2*one_third:top+h, left:right]
             light_array =  np.array([np.mean(crop_img3), np.mean(crop_img1), np.mean(crop_img2)])
-            print(self.colors_str[np.argmax(light_array) + 1])
+            print(str(self.imcount).zfill(4) + ' ' + self.colors_str[np.argmax(light_array) + 1])
             return(self.colors[np.argmax(light_array) + 1])
         elif scores[0] >= 0.5:
             if classes[0] == 1:
@@ -67,6 +72,10 @@ class TLClassifier(object):
             elif classes[0] == 3:
                 print('YELLOW')
                 return TrafficLight.YELLOW
-
+            else:
+                print('UNKNOWN')
+        else:
+            print('UNKNOWN')
+        self.imcount += 1
         return TrafficLight.UNKNOWN
 
