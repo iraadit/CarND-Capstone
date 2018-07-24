@@ -5,6 +5,9 @@ import numpy as np
 class TLClassifier(object):
     def __init__(self, is_site):
         #load classifier
+        self.is_site = is_site
+        self.colors = [TrafficLight.UNKNOWN, TrafficLight.GREEN, TrafficLight.RED, TrafficLight.YELLOW]
+        self.colors_str = ['UNKNOWN', 'GREEN', 'RED', 'YELLOW']
         if is_site:
             graph_path = './light_classification/models/model_real/frozen_inference_graph.pb'
         else:
@@ -40,11 +43,21 @@ class TLClassifier(object):
         boxes = np.squeeze(boxes)
         scores = np.squeeze(scores)
         classes = np.squeeze(classes).astype(np.int32)
-
         print('SCORES: ', scores[0])
         print('CLASSES: ', classes[0])
 
-        if scores[0] > 0.5:
+        im_height, im_width, _ = image.shape
+        if self.is_site and scores[0] < .9 and scores[0] > .4: #Deal with uncertainties in real images
+            ymin, xmin, ymax, xmax = tuple(boxes[0].tolist())
+            (left, right, top, bottom) = (round(xmin * im_width), round(xmax * im_width), round(ymin * im_height), round(ymax * im_height))
+            h = bottom - top + 1
+            crop_img1 = image[top:bottom, left:right]
+            crop_img2 = image[top+round(h/3):top+2*round(h/3), left:right]
+            crop_img3 = image[top+2*round(h/3):top+h, left:right]
+            light_array =  np.array([np.mean(crop_img3), np.mean(crop_img1), np.mean(crop_img2)])
+            print(self.colors_str[np.argmax(light_array) + 1])
+            return(self.colors[np.argmax(light_array) + 1])
+        elif scores[0] >= 0.5:
             if classes[0] == 1:
                 print('GREEN')
                 return TrafficLight.GREEN
