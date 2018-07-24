@@ -2,11 +2,11 @@ This is the project repo for the final project of the Udacity Self-Driving Car N
 
 ### Team Members
 Team Leader:
-Segun Oshin
+Olusegun Oshin
 segunoshin@googlemail.com  
 
-Sarvesh Shukla
-sarvesh231194@gmail.com
+Cesar Dominguez
+csar4231@gmail.com
 
 Renaud Bouckenooghe
 iraadit@gmail.com
@@ -14,8 +14,8 @@ iraadit@gmail.com
 Mir Ahsan
 tanzeem50@gmail.com
 
-Cesar Dominguez
-csar4231@gmail.com
+Sarvesh Shukla
+sarvesh231194@gmail.com
 
 
 
